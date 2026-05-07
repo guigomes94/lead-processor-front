@@ -2,11 +2,15 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, FileType, Loader2, CheckCircle } from 'lucide-react';
 import { api } from '../services/api';
+import { useLoteStatus } from '../hooks/useLoteStatus';
+import { ProgressDashboard } from '../components/ProgressDashboard';
 
 export function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [loteId, setLoteId] = useState<string | null>(null);
+
+  const { stats } = useLoteStatus(loteId);
 
   // Função chamada quando o usuário solta o arquivo na tela
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -100,10 +104,22 @@ export function UploadPage() {
           </div>
         )}
 
-        {/* Alerta de Sucesso (Provisório até fazermos a barra de progresso) */}
+        {/* Dashboard em Tempo Real */}
         {loteId && (
-          <div className="mt-4 rounded-lg bg-emerald-900/30 p-4 border border-emerald-500/30 text-emerald-400 text-sm">
-            Arquivo enviado com sucesso! ID do Lote: <span className="font-mono">{loteId}</span>
+          <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mt-6 text-center text-sm text-zinc-400">
+              Lote em processamento: <span className="font-mono text-zinc-300">{loteId}</span>
+            </div>
+            <ProgressDashboard stats={stats} />
+            {/* Notificação de Conclusão */}
+            {stats?.status === 'CONCLUIDO' && (
+              <div className="mt-6 flex items-center justify-center rounded-lg border border-emerald-500/50 bg-emerald-500/20 p-4 animate-in fade-in zoom-in duration-500">
+                <CheckCircle className="mr-2 h-6 w-6 text-emerald-400" />
+                <span className="font-medium text-emerald-400">
+                  Processamento concluído com sucesso!
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
