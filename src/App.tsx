@@ -1,13 +1,17 @@
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { UploadPage } from './pages/UploadPage';
 import { LeadsPage } from './pages/LeadsPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 function Navbar() {
   const location = useLocation();
   
   return (
     <nav className="flex justify-center border-b border-zinc-800 bg-zinc-950 p-4">
-      <div className="flex space-x-6">
+      <div className="flex space-x-8">
+        <Link to="/dashboard" className={`font-medium transition-colors ${location.pathname === '/dashboard' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          Dashboard
+        </Link>
         <Link
           to="/"
           className={`font-medium transition-colors ${
@@ -22,7 +26,7 @@ function Navbar() {
             location.pathname === '/leads' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
-          Ver Leads
+          Leads
         </Link>
       </div>
     </nav>
@@ -36,6 +40,7 @@ function App() {
       <Navbar /> 
       
       <Routes>
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/" element={<UploadPage />} />
         <Route path="/leads" element={<LeadsPage />} />
       </Routes>
