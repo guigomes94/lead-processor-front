@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, FileType, Loader2, CheckCircle } from 'lucide-react';
+import { UploadCloud, FileType, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import { useLoteStatus } from '../hooks/useLoteStatus';
 import { ProgressDashboard } from '../components/ProgressDashboard';
@@ -9,6 +9,7 @@ export function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [loteId, setLoteId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { stats } = useLoteStatus(loteId);
 
@@ -33,6 +34,9 @@ export function UploadPage() {
     if (!file) return;
 
     setIsUploading(true);
+    setErrorMsg(null);
+    setLoteId(null);
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -41,9 +45,15 @@ export function UploadPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setLoteId(response.data.loteId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao enviar arquivo:', error);
-      alert('Erro ao enviar o arquivo. Verifique se o backend está rodando!');
+      
+      // NOVO: Captura a mensagem exata do Spring Boot
+      if (error.response && error.response.data && error.response.data.erro) {
+        setErrorMsg(error.response.data.erro);
+      } else {
+        setErrorMsg('Erro inesperado ao tentar enviar o arquivo.');
+      }
     } finally {
       setIsUploading(false);
     }
@@ -76,6 +86,14 @@ export function UploadPage() {
             </div>
           )}
         </div>
+
+        {/* Alerta de Erro */}
+        {errorMsg && (
+          <div className="mt-4 flex items-center rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-400 animate-in fade-in zoom-in duration-300">
+            <AlertTriangle className="mr-3 h-5 w-5 shrink-0" />
+            <span className="text-sm">{errorMsg}</span>
+          </div>
+        )}
 
         {/* Informações do Arquivo Selecionado */}
         {file && (
